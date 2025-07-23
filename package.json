@@ -1,0 +1,39 @@
+{
+  "name": "postgres-prisma__next",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "docker:postgres": "docker run --name local-postgres -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=mydb -p 5432:5432 -d postgres:17",
+    "docker:down": "docker stop local-postgres && docker rm local-postgres",
+    "compose:up": "docker-compose up --build",
+    "compose:down": "docker-compose down",
+    "prisma:init": "pnpx prisma init --datasource-provider postgresql --output ./generated/prisma",
+    "prisma:generate": "pnpx prisma generate",
+    "prisma:studio": "pnpx prisma studio",
+    "prisma:db:push": "pnpx prisma db push",
+    "prisma:migrate": "pnpx prisma migrate dev --name",
+    "prisma:migrate:reset": "pnpx prisma migrate reset"
+  },
+  "dependencies": {
+    "@prisma/client": "6.12.0",
+    "next": "15.4.3",
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "15.4.3",
+    "prisma": "^6.12.0",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}

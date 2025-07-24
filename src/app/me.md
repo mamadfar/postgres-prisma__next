@@ -17,7 +17,7 @@ docker run --name local-postgres \
    ```bash
    npm install prisma --D
    # OR
-   pnpx install prisma --D
+   pnpm install prisma --D
    ```
 2. Initialize Prisma:
    ```bash

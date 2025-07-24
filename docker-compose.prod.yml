@@ -6,24 +6,46 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: mydb
+      POSTGRES_DB: short_next
+      PGDATA: /var/lib/postgresql/data/pgdata
     ports:
-      - "5433:5432"  # Different port for production
+      - "5433:5432"
     volumes:
       - postgres_data_prod:/var/lib/postgresql/data
+    restart: unless-stopped
 
-  app:
-    build: 
+  builder:
+    build:
       context: .
-      target: production
+      target: builder
     depends_on:
       - postgres
     environment:
-      DATABASE_URL: postgres://postgres:postgres@postgres:5432/mydb
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/short_next
+      NODE_ENV: production
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - build_output:/shared_build
+    command: sh -c "sleep 10 && npx prisma migrate deploy && npx prisma generate && npm run build && cp -r .next/* /shared_build/ && cp -r public /shared_build/ && echo 'Build complete, keeping container alive...' && tail -f /dev/null"
+
+  app:
+    image: node:20-alpine
+    depends_on:
+      - postgres
+      - builder
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/short_next
       NODE_ENV: production
     ports:
-      - "3001:3000"  # Different port for production
+      - "3001:3000"
     restart: unless-stopped
+    volumes:
+      - build_output:/shared_build
+      - .:/app
+    working_dir: /app
+    command: sh -c "cp -r /shared_build/* .next/ 2>/dev/null || true && cp -r /shared_build/public . 2>/dev/null || true && cp -r .next/static .next/standalone/.next/ 2>/dev/null || true && cp -r public .next/standalone/ 2>/dev/null || true && node .next/standalone/server.js"
 
 volumes:
   postgres_data_prod:
+  build_output:
